@@ -6,11 +6,19 @@ import datetime as dt
 from webdriver_manager.chrome import ChromeDriverManager
 
 
+# def init_browser():
+#     executable_path = {'executable_path': r"C:\Users\adamp\.wdm\drivers\chromedriver\win32\96.0.4664.45\chromedriver.exe"}
+#     return Browser("chrome", **executable_path, headless=False)
+
+
+
 def scrape_all():
     # Initiate headless driver for deployment
     executable_path = {'executable_path': ChromeDriverManager().install()}
     browser = Browser('chrome', **executable_path, headless=True)
 
+
+    # browser = init_browser()
     news_title, news_paragraph = mars_news(browser)
 
     # Run all scraping functions and store results in a dictionary
@@ -19,7 +27,9 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
+        "hemisphere_image_urls": mars_hemispheres(browser),
         "last_modified": dt.datetime.now()
+        
     }
 
     # Stop webdriver and return data
@@ -96,6 +106,40 @@ def mars_facts():
 
     # Convert dataframe into HTML format, add bootstrap
     return df.to_html(classes="table table-striped")
+
+def mars_hemispheres(browser):
+    
+    # 1. Use browser to visit the URL 
+    url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+    browser.visit(url)
+
+    # 2. Create a list to hold the images and titles.
+    hemisphere_image_urls = []
+    links = browser.find_by_css("a.product-item h3")
+
+    # 3. Write code to retrieve the image urls and titles for each hemisphere
+    for i in range(len(links)):
+        hemisphere = {}
+        try:
+        # We have to find the elements on each loop to avoid a stale element exception
+            browser.find_by_css("a.product-item h3")[i].click()
+
+        except BaseException:
+            return None  
+        
+        # Next, we find the Sample image anchor tag and extract the href
+        sample_elem = browser.links.find_by_text('Sample').first
+        hemisphere['img_url'] = sample_elem['href']
+        
+        # Get Hemisphere title
+        hemisphere['title'] = browser.find_by_css("h2.title").text
+        
+        # Append hemisphere object to list
+        hemisphere_image_urls.append(hemisphere)
+        
+        browser.back() 
+        
+        return hemisphere_image_urls
 
 if __name__ == "__main__":
 
