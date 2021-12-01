@@ -27,7 +27,7 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
-        "hemisphere_image_urls": mars_hemispheres(browser),
+        "hemispheres": mars_hemispheres(browser),
         "last_modified": dt.datetime.now()
         
     }
@@ -119,7 +119,7 @@ def mars_hemispheres(browser):
 
     # 3. Write code to retrieve the image urls and titles for each hemisphere
     for i in range(len(links)):
-        hemisphere = {}
+        hemispheres = {}
         try:
         # We have to find the elements on each loop to avoid a stale element exception
             browser.find_by_css("a.product-item h3")[i].click()
@@ -129,17 +129,17 @@ def mars_hemispheres(browser):
         
         # Next, we find the Sample image anchor tag and extract the href
         sample_elem = browser.links.find_by_text('Sample').first
-        hemisphere['img_url'] = sample_elem['href']
+        hemispheres['img_url'] = sample_elem['href']
         
         # Get Hemisphere title
-        hemisphere['title'] = browser.find_by_css("h2.title").text
+        hemispheres['title'] = browser.find_by_css("h2.title").text
         
         # Append hemisphere object to list
-        hemisphere_image_urls.append(hemisphere)
+        hemisphere_image_urls.append(hemispheres)
         
         browser.back() 
         
-        return hemisphere_image_urls
+    return hemisphere_image_urls
 
 if __name__ == "__main__":
 
